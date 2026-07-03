@@ -279,9 +279,11 @@ export default function ParkingApp() {
         fontFamily:
           "'Pretendard', 'Apple SD Gothic Neo', 'Noto Sans KR', -apple-system, sans-serif",
         background: "#F7F5EE",
-        minHeight: "100%",
+        minHeight: "100vh",
         color: "#1C1C1E",
         padding: "0",
+        display: "flex",
+        flexDirection: "column",
       }}
     >
       {/* header */}
@@ -431,7 +433,16 @@ export default function ParkingApp() {
         }
       `}</style>
 
-      <div style={{ padding: 24, maxWidth: 720, margin: "0 auto" }}>
+      <div
+        style={{
+          padding: 24, maxWidth: 720, margin: "0 auto", width: "100%",
+          boxSizing: "border-box",
+          flex: "1 0 auto",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+        }}
+      >
         {loading ? (
           <div
             style={{
@@ -772,6 +783,15 @@ export default function ParkingApp() {
         )}
         </>
         )}
+      </div>
+
+      <div
+        style={{
+          borderTop: "1px solid #EAE5D6", padding: "16px 24px",
+          textAlign: "center", fontSize: 11.5, color: "#A79F8A",
+        }}
+      >
+        IGM세계경영연구원 · 주차등록요청 시스템
       </div>
 
       {toast && (
