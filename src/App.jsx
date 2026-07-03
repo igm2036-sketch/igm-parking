@@ -1,11 +1,12 @@
 import React, { useState, useMemo, useEffect, useRef } from "react";
-import { Car, Users, ClipboardList, Download, Check, X, Clock, ShieldCheck, Bell, Search, Lock } from "lucide-react";
+import { Car, Users, ClipboardList, Download, Check, X, Clock, ShieldCheck, Bell, Search, Lock, Trash2 } from "lucide-react";
 import * as XLSX from "xlsx";
 import { db } from "./firebase";
 import {
   collection,
   addDoc,
   updateDoc,
+  deleteDoc,
   doc,
   onSnapshot,
   query,
@@ -91,6 +92,7 @@ export default function ParkingApp() {
   const [missingFields, setMissingFields] = useState(null);
   const [adminUnlocked, setAdminUnlocked] = useState(false);
   const [showPasswordPrompt, setShowPasswordPrompt] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState(null);
   const [passwordInput, setPasswordInput] = useState("");
   const [passwordError, setPasswordError] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -203,6 +205,17 @@ export default function ParkingApp() {
     } catch (error) {
       console.error("상태 업데이트 오류:", error);
       showToast("처리 중 문제가 발생했어요. 다시 시도해주세요.");
+    }
+  };
+
+  const deleteRequest = async (id) => {
+    try {
+      await deleteDoc(doc(db, "requests", id));
+      setDeleteTarget(null);
+      showToast("삭제됐어요.");
+    } catch (error) {
+      console.error("삭제 오류:", error);
+      showToast("삭제 중 문제가 발생했어요. 다시 시도해주세요.");
     }
   };
 
@@ -694,45 +707,59 @@ export default function ParkingApp() {
                           {r.type === "employee" && r.dept ? ` · ${r.dept}` : ""}
                         </div>
                       </div>
-                      {r.status === "pending" ? (
-                        <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
+                      <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
+                        {r.status === "pending" ? (
+                          <>
+                            <button
+                              onClick={() => updateStatus(r.id, "approved")}
+                              title="승인"
+                              style={{
+                                width: 32, height: 32, borderRadius: 8, border: "none",
+                                background: "#2F7D52", color: "#fff", cursor: "pointer",
+                                display: "flex", alignItems: "center", justifyContent: "center",
+                              }}
+                            >
+                              <Check size={16} />
+                            </button>
+                            <button
+                              onClick={() => updateStatus(r.id, "rejected")}
+                              title="거절"
+                              style={{
+                                width: 32, height: 32, borderRadius: 8, border: "none",
+                                background: "#C0392B", color: "#fff", cursor: "pointer",
+                                display: "flex", alignItems: "center", justifyContent: "center",
+                              }}
+                            >
+                              <X size={16} />
+                            </button>
+                          </>
+                        ) : (
                           <button
-                            onClick={() => updateStatus(r.id, "approved")}
-                            title="승인"
+                            onClick={() => updateStatus(r.id, "pending")}
+                            title="대기로 되돌리기"
                             style={{
-                              width: 32, height: 32, borderRadius: 8, border: "none",
-                              background: "#2F7D52", color: "#fff", cursor: "pointer",
+                              width: 32, height: 32, borderRadius: 8,
+                              border: "1.5px solid #E4DFD1", background: "#fff",
+                              color: "#8A8577", cursor: "pointer",
                               display: "flex", alignItems: "center", justifyContent: "center",
                             }}
                           >
-                            <Check size={16} />
+                            <Clock size={15} />
                           </button>
-                          <button
-                            onClick={() => updateStatus(r.id, "rejected")}
-                            title="거절"
-                            style={{
-                              width: 32, height: 32, borderRadius: 8, border: "none",
-                              background: "#C0392B", color: "#fff", cursor: "pointer",
-                              display: "flex", alignItems: "center", justifyContent: "center",
-                            }}
-                          >
-                            <X size={16} />
-                          </button>
-                        </div>
-                      ) : (
+                        )}
                         <button
-                          onClick={() => updateStatus(r.id, "pending")}
-                          title="대기로 되돌리기"
+                          onClick={() => setDeleteTarget(r)}
+                          title="삭제"
                           style={{
-                            flexShrink: 0, width: 32, height: 32, borderRadius: 8,
-                            border: "1.5px solid #E4DFD1", background: "#fff",
-                            color: "#8A8577", cursor: "pointer",
+                            width: 32, height: 32, borderRadius: 8,
+                            border: "1.5px solid #F5D9D2", background: "#FFF6F4",
+                            color: "#C0392B", cursor: "pointer",
                             display: "flex", alignItems: "center", justifyContent: "center",
                           }}
                         >
-                          <Clock size={15} />
+                          <Trash2 size={15} />
                         </button>
-                      )}
+                      </div>
                     </div>
                   );
                 })}
@@ -885,6 +912,77 @@ export default function ParkingApp() {
             >
               확인
             </button>
+          </div>
+        </div>
+      )}
+
+      {deleteTarget && (
+        <div
+          style={{
+            position: "fixed", inset: 0, background: "rgba(22,35,63,0.55)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            zIndex: 100, padding: 20,
+          }}
+          onClick={() => setDeleteTarget(null)}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              background: "#fff", borderRadius: 16, padding: "28px 26px",
+              maxWidth: 340, width: "100%", textAlign: "center",
+              boxShadow: "0 12px 32px rgba(22,35,63,0.25)",
+            }}
+          >
+            <div
+              style={{
+                width: 56, height: 56, borderRadius: "50%", background: "#FBEAE7",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                margin: "0 auto 14px",
+              }}
+            >
+              <Trash2 size={26} color="#C0392B" strokeWidth={2.5} />
+            </div>
+            <h2 style={{ margin: "0 0 8px", fontSize: 17, fontWeight: 800, color: "#16233F" }}>
+              이 신청을 삭제할까요?
+            </h2>
+            <p style={{ margin: "0 0 16px", fontSize: 12.5, color: "#8A8577", lineHeight: 1.6 }}>
+              삭제하면 되돌릴 수 없어요. 필요하면 삭제 전에 엑셀로 먼저 백업해두세요.
+            </p>
+            <div
+              style={{
+                background: "#FAF8F2", borderRadius: 10, padding: "12px 16px",
+                textAlign: "left", marginBottom: 20, fontSize: 13,
+              }}
+            >
+              <div style={{ fontWeight: 700 }}>
+                {deleteTarget.name} <span style={{ color: "#8A8577", fontWeight: 500 }}>· {deleteTarget.plate}</span>
+              </div>
+              <div style={{ color: "#8A8577", marginTop: 2 }}>
+                {TYPE_META[deleteTarget.type].label} · {deleteTarget.date}
+              </div>
+            </div>
+            <div style={{ display: "flex", gap: 8 }}>
+              <button
+                onClick={() => setDeleteTarget(null)}
+                style={{
+                  flex: 1, padding: "11px", borderRadius: 9, border: "1.5px solid #E4DFD1",
+                  background: "#fff", color: "#5B5646", fontWeight: 700, fontSize: 14,
+                  cursor: "pointer",
+                }}
+              >
+                취소
+              </button>
+              <button
+                onClick={() => deleteRequest(deleteTarget.id)}
+                style={{
+                  flex: 1, padding: "11px", borderRadius: 9, border: "none",
+                  background: "#C0392B", color: "#fff", fontWeight: 700, fontSize: 14,
+                  cursor: "pointer",
+                }}
+              >
+                삭제
+              </button>
+            </div>
           </div>
         </div>
       )}
