@@ -70,6 +70,8 @@ const inputStyle = {
   color: "#1C1C1E",
   background: "#FFFFFF",
   outline: "none",
+  width: "100%",
+  boxSizing: "border-box",
 };
 
 function formatPhone(raw) {
@@ -335,7 +337,8 @@ export default function ParkingApp() {
           </span>
           <span style={{ fontSize: 12.5, color: "#E8ECF5", lineHeight: 1.55 }}>
             1. 주차등록요청은 당일 오후 1시까지 접수받고 있으며, 이후 등록이 불가능합니다.<br />
-            2. 오후 1시 이후 요청으로 미등록되어 주차요금이 부과될 경우, 개인비용으로 부과됩니다.
+            2. 오후 1시 이후 요청으로 미등록되어 주차요금이 부과될 경우, 개인비용으로 부과됩니다.<br />
+            3. 주차등록은 오후 1시에 일괄등록됩니다. 이전에 출차하시는 분은 GA로 요청바랍니다.
           </span>
         </div>
 
@@ -473,7 +476,7 @@ export default function ParkingApp() {
             </div>
 
             <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 14 }}>
                 <FormField label="이름 *">
                   <input style={inputStyle} value={form.name}
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
@@ -485,7 +488,7 @@ export default function ParkingApp() {
                     placeholder="12가 3456" />
                 </FormField>
               </div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 14 }}>
                 <FormField label="연락처 *" hint="(숫자만 입력)">
                   <input
                     style={inputStyle}
@@ -538,7 +541,7 @@ export default function ParkingApp() {
               style={{
                 background: "#FFFFFF", borderRadius: 14, padding: 20,
                 border: "1px solid #ECE7D9", marginBottom: 14,
-                display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12,
+                display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 12,
               }}
             >
               <FormField label="이름">
