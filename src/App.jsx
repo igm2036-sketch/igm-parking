@@ -74,6 +74,15 @@ const inputStyle = {
   boxSizing: "border-box",
 };
 
+function formatSubmittedTime(iso) {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return "";
+  const hh = String(d.getHours()).padStart(2, "0");
+  const mm = String(d.getMinutes()).padStart(2, "0");
+  return `${hh}:${mm} 접수`;
+}
+
 function formatPhone(raw) {
   const digits = raw.replace(/\D/g, "").slice(0, 11);
   if (digits.length < 4) return digits;
@@ -719,6 +728,9 @@ export default function ParkingApp() {
                           {r.date} {r.phone && `· ${r.phone}`}
                           {r.type === "visitor" && r.purpose ? ` · ${r.purpose}` : ""}
                           {r.type === "employee" && r.dept ? ` · ${r.dept}` : ""}
+                        </div>
+                        <div style={{ fontSize: 11.5, color: "#B7AF9C", marginTop: 2 }}>
+                          {formatSubmittedTime(r.submittedAt)}
                         </div>
                       </div>
                       <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
